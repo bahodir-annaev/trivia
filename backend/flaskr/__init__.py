@@ -94,11 +94,19 @@ def create_app(test_config=None):
   @app.route('/questions', methods=['POST'])
   def add_question():
     body = request.get_json()
+    question=body.get('question', None)
+    answer=body.get('answer', None)
+    category=body.get('category', None)
+    difficulty=body.get('difficulty', None)
+
+    if any([ not param for param in [question, answer, category, difficulty]]):
+      abort(400)
+
     question = Question(
-      question=body.get('question', None),
-      answer=body.get('answer', None),
-      category=body.get('category', None),
-      difficulty=body.get('difficulty', None)
+      question=question,
+      answer=answer,
+      category=category,
+      difficulty=difficulty
       )
     try:
       question.insert()
@@ -122,7 +130,9 @@ def create_app(test_config=None):
 
   @app.route('/searched_questions', methods=['POST'])
   def search_questions():
-    search_term = request.get_json()['searchTerm']
+    search_term = request.get_json().get('searchTerm', None)
+    if not search_term:
+      abort(400)
     questions = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
     if len(questions) == 0:
       abort(404)
@@ -163,7 +173,7 @@ def create_app(test_config=None):
   and shown whether they were correct or not. 
   '''
   @app.route('/quizzes', methods=['POST'])
-  def get_quzzes():
+  def get_quizzes():
     body = request.get_json()
     previous_questions = body.get('previous_questions', [])
     quiz_category = int(body.get('quiz_category', 0))
@@ -186,6 +196,14 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+  @app.errorhandler(400)
+  def not_found(error):
+    return jsonify({
+      'success': False,
+      'status': 400,
+      'message': 'Bad request'
+    }), 400
+
   @app.errorhandler(404)
   def not_found(error):
     return jsonify({

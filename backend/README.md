@@ -71,22 +71,143 @@ REVIEW_COMMENT
 This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
 
 Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
 
 GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Fetches a list of categories objects
 - Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
+- Returns: A list of categories, that contains a object with properties (id:int, type:string) . 
+{
+  "categories": [
+      { "id": 1, "type": "Science" },
+      { "id": 2, "type": "Art" },
+      { "id": 3, "type": "Geography" },
+      { "id": 4, "type": "History" },
+      { "id": 5, "type": "Entertainment" },
+      { "id": 6, "type": "Sports" }
+  ],
+  "success": true
+}
 
+GET '/questions'
+- Fetches a paginated list of questions by 10 in each page alongside with list of categories and total_questions (number of all questions avalable)
+- Request Arguments: page :int
+- Returns: A list of questions object with properties (id:int question:string answer:string category:int difficulty:int); list of categories; total_questions:int
+{
+  "categories": [ ... ],
+  "questions": [
+    { 
+      "id": 5,
+      "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+      "answer": "Maya Angelou",
+      "category": 4,
+      "difficulty": 2,
+    },
+    {
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+    },
+    ...
+  ],
+  "total_questions": 19,
+  "success": true
+}
+
+
+GET '/categories/<int:category_id>/questions'
+- Fetches a list of questions filtered by category id and total_questions count
+- Path parameter: category_id
+
+request /categories/3/questions
+{
+  "questions": [
+    {
+        "id": 13,
+        "question": "What is the largest lake in Africa?"
+        "answer": "Lake Victoria",
+        "category": 3,
+        "difficulty": 2,
+    },
+    {
+      "id": 14,
+      "question": "In which royal palace would you find the Hall of Mirrors?"
+      "answer": "The Palace of Versailles",
+      "category": 3,
+      "difficulty": 3,
+    },
+    {
+      "id": 15,
+      "question": "The Taj Mahal is located in which Indian city?"
+      "answer": "Agra",
+      "category": 3,
+      "difficulty": 2,
+    }
+  "total_questions": 3,
+  "success": true
+}
+
+DELETE '/questions/<int:question_id>'
+- Deletes a question by id
+- Path parameter: question_id
+- Returns id of the deleted question on success
+{
+  "success": true,
+  "deleted": 1
+}
+
+
+POST '/searched_questions'
+- Fetches a list of questions by search term
+- Request body: {searchTerm:string}
+
+request /searched_questions body:{searchTerm: 'Cassius'}
+
+{
+  "questions": [
+    {
+      "id": 9,
+      "question": "What boxer's original name is Cassius Clay?"
+      "answer": "Muhammad Ali",
+      "category": 4,
+      "difficulty": 1,
+    }
+  ],
+  "success": true,
+  "total_questions": 1
+}
+
+
+POST '/questions'
+- Adds new questions with provided properties
+- Request body: {question:string, answer:string, category:int, difficulty:int}
+- Returns id of the newly added question
+
+request /questions body:{questions: 'New question?', answer: 'New answer!', category: 1, difficulty: 1}
+
+{
+  "success": true,
+  "added": 33
+}
+
+POST '/quizzes'
+- Fetches a single question randomly chosen from list of available questions.
+- Request body: {previous_questions: [list of ids], quiz_category: int (if 0 no category selected)}
+- Returned question category must match the provided quiz_category(in cases where quiz_category is greater than zero) and question id must not be in the previous_questions list.
+
+request /quizzes body:{previous_questions: [9, 12, 23], quiz_category: 4}
+
+{
+  "question": {
+    "id": 5,
+    "question": "Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?"
+    "answer": "Maya Angelou",
+    "category": 4,
+    "difficulty": 2,
+  },
+  "success": true
+}
 ```
 
 
